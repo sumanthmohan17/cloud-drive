@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 function getFileType(name = "") {
   const ext = name.split(".").pop().toLowerCase();
@@ -42,23 +42,25 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const fileInputRef        = useRef();
 
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
   try {
     const res = await fetch(`${BACKEND}/files`);
     const data = await res.json();
-
-    // ✅ Always ensure array
-    if (Array.isArray(data)) {
-      setFiles(data);
-    } else {
-      console.error("Invalid response:", data);
-      setFiles([]);
-    }
+    if (Array.isArray(data)) setFiles(data);
   } catch (err) {
-    console.error("Fetch error:", err);
-    setFiles([]); // fallback
+    console.error(err);
   }
-};
+}, [BACKEND]);
+
+const fetchUsage = useCallback(async () => {
+  try {
+    const res = await fetch(`${BACKEND}/usage`);
+    const data = await res.json();
+    setUsage(data);
+  } catch (err) {
+    console.error(err);
+  }
+}, [BACKEND]);
 
   const fetchUsage = async () => {
     try {
@@ -69,12 +71,9 @@ export default function Home() {
   };
 
   useEffect(() => {
-    (async () => {
-      await fetchFiles();
-      await fetchUsage();
-      setLoading(false);
-    })();
-  }, []);
+  fetchFiles();
+  fetchUsage();
+}, [fetchFiles, fetchUsage]);
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
