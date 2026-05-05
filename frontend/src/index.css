@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth animations globally */
+* {
+  transition: all 0.25s ease-in-out;
+}
+
+body {
+  font-family: "Orbitron", "Poppins", sans-serif;
+}
+.neon-text {
+  text-shadow: 0 0 6px #00e5ff, 0 0 12px #00e5ff;
+}
+
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; }
+  50% { box-shadow: 0 0 20px #00e5ff, 0 0 40px #00e5ff; }
+  100% { box-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; }
+}
+.animate-pulse {
+  animation: neonPulse 1.5s infinite;
+}
