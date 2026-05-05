@@ -1,70 +1,24 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
-function getFileType(name = "") {
-  const ext = name.split(".").pop().toLowerCase();
-  if (["png","jpg","jpeg","gif","webp","svg"].includes(ext)) return "image";
-  if (["mp4","webm","ogg","mov"].includes(ext)) return "video";
-  if (["mp3","wav","aac"].includes(ext)) return "audio";
-  if (ext === "pdf") return "pdf";
-  return "other";
-}
-
-function getFileIcon(name = "") {
-  const t = getFileType(name);
-  if (t === "image") return "🖼️";
-  if (t === "video") return "🎬";
-  if (t === "audio") return "🎵";
-  if (t === "pdf") return "📄";
-  return "📁";
-}
-
-function getBadge(name = "") {
-  const t = getFileType(name);
-  if (t === "image") return { label: "IMG", cls: "images" };
-  if (t === "video") return { label: "VID", cls: "videos" };
-  if (t === "audio") return { label: "AUD", cls: "audio" };
-  if (t === "pdf") return { label: "PDF", cls: "pdfs" };
-  return null;
-}
-
-function formatSize(bytes = 0) {
-  if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + " MB";
-  if (bytes >= 1024) return (bytes / 1024).toFixed(2) + " KB";
-  return bytes + " B";
-}
-
 export default function Home() {
   const BACKEND = process.env.REACT_APP_API_URL;
 
   const [files, setFiles] = useState([]);
   const [usage, setUsage] = useState({ used: 0, percent: 0 });
   const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   const fileInputRef = useRef();
 
-  // ✅ FIXED
   const fetchFiles = useCallback(async () => {
-    try {
-      const res = await fetch(`${BACKEND}/files`);
-      const data = await res.json();
-      if (Array.isArray(data)) setFiles(data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
+    const res = await fetch(`${BACKEND}/files`);
+    const data = await res.json();
+    setFiles(data);
   }, [BACKEND]);
 
-  // ✅ FIXED
   const fetchUsage = useCallback(async () => {
-    try {
-      const res = await fetch(`${BACKEND}/usage`);
-      const data = await res.json();
-      setUsage(data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await fetch(`${BACKEND}/usage`);
+    const data = await res.json();
+    setUsage(data);
   }, [BACKEND]);
 
   useEffect(() => {
@@ -79,103 +33,75 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      await fetch(`${BACKEND}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      fetchFiles();
-      fetchUsage();
-    } catch (err) {
-      console.error(err);
-    }
+    await fetch(`${BACKEND}/upload`, {
+      method: "POST",
+      body: formData,
+    });
 
-    e.target.value = "";
+    fetchFiles();
+    fetchUsage();
   };
 
   const deleteFile = async (id) => {
-    try {
-      await fetch(`${BACKEND}/files/${id}`, { method: "DELETE" });
-      fetchFiles();
-      fetchUsage();
-    } catch (err) {
-      console.error(err);
-    }
+    await fetch(`${BACKEND}/files/${id}`, { method: "DELETE" });
+    fetchFiles();
+    fetchUsage();
   };
 
   const usedMB = (usage.used / 1024 / 1024).toFixed(2);
-
-  const tabs = [
-    { label: "Home" },
-    { label: "My Files" },
-    { label: "Transfer" },
-    { label: "About" },
-  ];
-
-  const FileGrid = ({ items }) => {
-    if (!Array.isArray(items)) return null;
-
-    return (
-      <div className="files-grid">
-        {items.map((f) => {
-          const badge = getBadge(f.name);
-          return (
-            <div key={f._id} className="file-card">
-              <div className="file-info">
-                <div className="file-icon-box">{getFileIcon(f.name)}</div>
-                <div>
-                  <div className="file-name">{f.name}</div>
-                  <div className="file-meta">
-                    {f.size ? formatSize(f.size) + " · " : ""}
-                    👁 {f.views ?? 0}
-                    {badge && <span className={`badge ${badge.cls}`}>{badge.label}</span>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="file-actions">
-                <a href={f.url} target="_blank" rel="noreferrer">Preview</a>
-                <a href={`/share/${f._id}`}>Share</a>
-                <button onClick={() => deleteFile(f._id)}>Delete</button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
 
   return (
     <div>
 
       {/* HEADER */}
       <header className="header">
-        <h2>☁️ Cloud Drive</h2>
+        <div className="header-inner">
+          <div className="logo">
+            <div className="logo-icon">☁️</div>
+            <span className="logo-text">Cloud Drive</span>
+          </div>
+        </div>
       </header>
 
       {/* NAVBAR */}
       <nav className="navbar">
-        {tabs.map((t, i) => (
-          <button
-            key={i}
-            className={tab === i ? "active" : ""}
-            onClick={() => setTab(i)}
-          >
-            {t.label}
-          </button>
-        ))}
+        <div className="navbar-inner">
+          {["Home", "My Files", "File Transfer", "About"].map((t, i) => (
+            <button
+              key={i}
+              className={`nav-tab ${tab === i ? "active" : ""}`}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* MAIN */}
-      <main>
+      <main className="main">
 
-        {tab === 0 && (
-          <>
-            <p>{usedMB} MB used</p>
+        {/* HOME */}
+        <div className={`section ${tab === 0 ? "active" : ""}`}>
 
-            <button onClick={() => fileInputRef.current?.click()}>
-              Upload File
-            </button>
+          <div className="storage-card">
+            <div className="storage-top">
+              <span className="storage-label">Storage Used</span>
+              <span className="storage-val">{usedMB} MB</span>
+            </div>
+            <div className="bar-bg">
+              <div
+                className="bar-fill"
+                style={{ width: `${usage.percent}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="upload-card" onClick={() => fileInputRef.current.click()}>
+            <p className="upload-hint">
+              <span>Drag & drop</span> or click
+            </p>
+            <button className="upload-btn">Upload</button>
 
             <input
               ref={fileInputRef}
@@ -183,16 +109,30 @@ export default function Home() {
               style={{ display: "none" }}
               onChange={handleUpload}
             />
+          </div>
 
-            {loading ? <p>Loading...</p> : <FileGrid items={files} />}
-          </>
-        )}
+          <div className="files-grid">
+            {files.map((f) => (
+              <div key={f._id} className="file-card">
+                <div className="file-name">{f.name}</div>
 
-        {tab === 1 && <FileGrid items={files} />}
+                <div className="file-actions">
+                  <a href={f.url} target="_blank" rel="noreferrer" className="action-btn">
+                    Preview
+                  </a>
 
-        {tab === 2 && <p>File transfer coming soon...</p>}
+                  <button
+                    className="action-btn btn-delete"
+                    onClick={() => deleteFile(f._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
-        {tab === 3 && <p>About section</p>}
+        </div>
 
       </main>
     </div>
