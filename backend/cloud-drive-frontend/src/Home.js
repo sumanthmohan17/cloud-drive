@@ -37,9 +37,8 @@ export default function Home() {
   const BACKEND = process.env.REACT_APP_API_URL;
 
   const [files, setFiles] = useState([]);
-  const [usage, setUsage] = useState({ used: 0, percent: 0 });
-  const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(true);
+const [usage, setUsage] = useState({ used: 0, percent: 0 });
+const [loading, setLoading] = useState(true);
   const fileInputRef = useRef();
 
   // ✅ FIXED (single definition)
