@@ -183,7 +183,7 @@ app.get("/transfer/receive/:code", (req, res) => {
     url: entry.url,
     size: entry.size,
     type: entry.type,
-    expiresIn: `${hours}h ${mins}m`,
+    expiresAt: entry.expiresAt,
   });
 });
 

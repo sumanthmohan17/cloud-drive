@@ -125,13 +125,54 @@ function FileTransfer() {
   const [sendResult, setSendResult] = useState(null); // { code, expiresIn, name, size }
   const [sendError, setSendError] = useState("");
   const sendInputRef = useRef();
-
+  const [sendTimeLeft, setSendTimeLeft] = useState("");
   // RECEIVE
   const [code, setCode] = useState("");
   const [receiving, setReceiving] = useState(false);
   const [receiveResult, setReceiveResult] = useState(null);
   const [receiveError, setReceiveError] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
 
+  useEffect(() => {
+  if (!receiveResult?.expiresAt) return;
+
+  const interval = setInterval(() => {
+    const remaining = receiveResult.expiresAt - Date.now();
+
+    if (remaining <= 0) {
+      setTimeLeft("Expired");
+      clearInterval(interval);
+      return;
+    }
+
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+
+    setTimeLeft(`${mins}:${secs.toString().padStart(2, "0")}`);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [receiveResult]);
+useEffect(() => {
+  if (!sendResult?.expiresAt) return;
+
+  const interval = setInterval(() => {
+    const remaining = sendResult.expiresAt - Date.now();
+
+    if (remaining <= 0) {
+      setSendTimeLeft("Expired");
+      clearInterval(interval);
+      return;
+    }
+
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+
+    setSendTimeLeft(`${mins}:${secs.toString().padStart(2, "0")}`);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [sendResult]);
   const doSend = async () => {
     if (!sendFile) return;
     setSending(true); setSendError(""); setSendResult(null);
@@ -201,7 +242,12 @@ function FileTransfer() {
             <div style={{textAlign:"center"}}>
               <div style={{fontSize:12,color:"rgba(255,255,255,0.4)",marginBottom:12}}>Your Share Code</div>
               <div style={{fontSize:48,fontWeight:700,letterSpacing:12,color:"#fff",fontFamily:"monospace",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:14,padding:"18px 24px",marginBottom:12}}>{sendResult.code}</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginBottom:20}}>Expires in 15 mins {sendResult.name}</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginBottom:20}}>⏳ {sendTimeLeft} · {sendResult.name}</div>
+              {sendTimeLeft === "Expired" && (
+  <div style={{color:"#f87171",fontSize:12, marginTop:6}}>
+    Code expired
+  </div>
+)}
               <button onClick={()=>{navigator.clipboard.writeText(sendResult.code);alert(`Code ${sendResult.code} copied!`);}} style={{width:"100%",padding:"10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.06)",color:"#fff",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginBottom:10}}>📋 Copy Code</button>
               <button onClick={()=>{setSendResult(null);setSendFile(null);}} style={{width:"100%",padding:"10px",borderRadius:10,border:"none",background:"transparent",color:"rgba(255,255,255,0.35)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Send another file</button>
             </div>
@@ -232,7 +278,7 @@ function FileTransfer() {
                 <span style={{fontSize:28}}>{getFileIcon(receiveResult.name)}</span>
                 <div>
                   <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>{receiveResult.name}</div>
-                  <div style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{formatBytes(receiveResult.size)} · Expires in {receiveResult.expiresIn}</div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{formatBytes(receiveResult.size)} · ⏳ {timeLeft}</div>
                 </div>
               </div>
               <button onClick={()=>downloadFile(receiveResult.url, receiveResult.name)} style={{width:"100%",padding:"10px",borderRadius:10,border:"none",background:"#4ade80",color:"#111",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>⬇️ Download File</button>
