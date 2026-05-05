@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cloud Drive</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+
+/* Global */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:'DM Sans',sans-serif;
+background:#f8fafc;
+color:#0f172a;
+min-height:100vh;
+}
+
+/* Header */
+
+.header{
+background:rgba(255,255,255,0.9);
+backdrop-filter:blur(10px);
+border-bottom:1px solid #e2e8f0;
+position:sticky;
+top:0;
+z-index:50;
+}
+
+.header-inner{
+max-width:1200px;
+margin:auto;
+padding:0 24px;
+height:64px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.logo-text{
+font-size:18px;
+font-weight:700;
+}
+
+.header-tag{
+color:#64748b;
+font-size:13px;
+}
+
+/* Glass Navbar */
+.navbar{
+position:sticky;
+top:64px;
+width:100%;
+z-index:40;
+
+background:rgba(255,255,255,0.65);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+
+border-bottom:1px solid rgba(226,232,240,0.6);
+
+box-shadow:
+0 8px 32px rgba(15,23,42,0.04),
+0 2px 8px rgba(15,23,42,0.03);
+}
+
+/* Navbar Inner */
+.navbar-inner{
+width:100%;
+display:flex;
+justify-content:center;
+gap:12px;
+padding:12px 24px;
+}
+
+/* Tabs */
+.nav-tab{
+padding:10px 20px;
+border-radius:10px;
+border:none;
+background:transparent;
+font-weight:600;
+color:#64748b;
+cursor:pointer;
+transition:all .2s ease;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+/* Hover */
+.nav-tab:hover{
+background:rgba(241,245,249,0.7);
+color:#2563eb;
+}
+
+/* Active */
+.nav-tab.active{
+background:rgba(239,246,255,0.9);
+color:#2563eb;
+box-shadow:
+0 4px 14px rgba(37,99,235,0.15);
+}
+
+/* Main */
+
+.main{
+max-width:1200px;
+margin:auto;
+padding:32px 24px;
+}
+
+/* Section Animation */
+
+.section{
+display:none;
+opacity:0;
+transform:translateY(8px);
+transition:.25s ease;
+}
+
+.section.active{
+display:block;
+opacity:1;
+transform:translateY(0);
+}
+
+/* Cards */
+
+.storage-card,
+.file-card,
+.send-card,
+.about-card,
+.tech-card,
+.how-card{
+background:white;
+border-radius:16px;
+border:1px solid #e2e8f0;
+box-shadow:
+0 1px 2px rgba(0,0,0,.03),
+0 8px 24px rgba(0,0,0,.03);
+}
+
+/* Storage */
+
+.storage-card{
+padding:20px;
+margin-bottom:20px;
+}
+
+.storage-top{
+display:flex;
+justify-content:space-between;
+margin-bottom:8px;
+}
+
+.bar-bg{
+height:6px;
+background:#e2e8f0;
+border-radius:999px;
+}
+
+.bar-fill{
+height:100%;
+width:6%;
+background:#2563eb;
+border-radius:999px;
+}
+
+/* Upload */
+
+.upload-card{
+border:2px dashed #e2e8f0;
+padding:32px;
+text-align:center;
+border-radius:16px;
+margin-bottom:28px;
+}
+
+.upload-btn{
+background:#2563eb;
+color:white;
+border:none;
+padding:12px;
+border-radius:10px;
+font-weight:600;
+cursor:pointer;
+}
+
+.upload-btn:hover{
+background:#1d4ed8;
+}
+
+/* Files */
+
+.files-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px;
+}
+
+.file-card{
+padding:18px;
+}
+
+.file-info{
+display:flex;
+gap:12px;
+margin-bottom:12px;
+}
+
+.file-actions{
+display:flex;
+gap:6px;
+}
+
+.action-btn{
+flex:1;
+padding:8px;
+border-radius:8px;
+border:none;
+font-size:12px;
+font-weight:600;
+cursor:pointer;
+}
+
+.btn-preview{
+background:#f1f5f9;
+}
+
+.btn-share{
+background:#eff6ff;
+color:#2563eb;
+}
+
+.btn-delete{
+background:#fff1f2;
+color:#ef4444;
+}
+
+/* Send */
+
+.send-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.send-card{
+padding:28px;
+}
+
+.send-btn,
+.receive-btn,
+.download-btn{
+background:#2563eb;
+color:white;
+border:none;
+padding:12px;
+border-radius:10px;
+font-weight:600;
+cursor:pointer;
+}
+
+/* About */
+
+.about-hero{
+background:linear-gradient(135deg,#2563eb,#4f46e5);
+color:white;
+padding:40px;
+border-radius:20px;
+text-align:center;
+margin-bottom:20px;
+}
+
+/* Buttons */
+
+button:active{
+transform:scale(.97);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header class="header">
+<div class="header-inner">
+<div>
+<span style="font-size:22px;">☁️</span>
+<span class="logo-text">Cloud Drive</span>
+</div>
+<span class="header-tag">Secure File Storage 🔒</span>
+</div>
+</header>
+
+<nav class="navbar">
+<div class="navbar-inner">
+<button class="nav-tab active" onclick="showTab(0)">🏠 Home</button>
+<button class="nav-tab" onclick="showTab(1)">📁 My Files</button>
+<button class="nav-tab" onclick="showTab(2)">📤 File transfer</button>
+<button class="nav-tab" onclick="showTab(3)">ℹ️ About</button>
+</div>
+</nav>
+
+<main class="main">
+
+<!-- HOME -->
+
+<div class="section active" id="sec-0">
+
+<div class="storage-card">
+<div class="storage-top">
+<span>Storage Used</span>
+<span>62.57 MB / 1024 MB</span>
+</div>
+
+<div class="bar-bg">
+<div class="bar-fill"></div>
+</div>
+
+</div>
+
+<div class="upload-card">
+<div style="font-size:36px;">📂</div>
+<p>Drag & drop file here</p>
+<br>
+<button class="upload-btn">Upload File</button>
+</div>
+
+<div class="files-grid">
+
+<div class="file-card">
+<div class="file-info">
+<span>🖼️</span>
+<div>
+<div>Image1.png</div>
+<div>3.59MB</div>
+</div>
+</div>
+
+<div class="file-actions">
+<button class="action-btn btn-preview">Preview</button>
+<button class="action-btn btn-share">Share</button>
+<button class="action-btn btn-delete">Delete</button>
+</div>
+
+</div>
+
+<div class="file-card">
+<div class="file-info">
+<span>🎬</span>
+<div>
+<div>Video.mp4</div>
+<div>31.54MB</div>
+</div>
+</div>
+
+<div class="file-actions">
+<button class="action-btn btn-preview">Preview</button>
+<button class="action-btn btn-share">Share</button>
+<button class="action-btn btn-delete">Delete</button>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="section" id="sec-1">
+<h2>My Files</h2>
+</div>
+
+<div class="section" id="sec-2">
+<h2>Transfer</h2>
+</div>
+
+<div class="section" id="sec-3">
+<div class="about-hero">
+<h2>Cloud Drive</h2>
+<p>Professional Cloud Storage System</p>
+</div>
+</div>
+
+</main>
+
+<script>
+
+function showTab(index){
+
+const tabs=document.querySelectorAll(".nav-tab");
+const sections=document.querySelectorAll(".section");
+
+tabs.forEach((t,i)=>{
+t.classList.toggle("active",i===index)
+})
+
+sections.forEach((s)=>{
+s.classList.remove("active")
+})
+
+setTimeout(()=>{
+sections[index].classList.add("active")
+},120)
+
+}
+
+</script>
+
+</body>
+</html>

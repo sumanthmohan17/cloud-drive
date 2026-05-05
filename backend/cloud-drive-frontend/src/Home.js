@@ -43,12 +43,22 @@ export default function Home() {
   const fileInputRef        = useRef();
 
   const fetchFiles = async () => {
-    try {
-      const res  = await fetch(`${BACKEND}/files`);
-      const data = await res.json();
+  try {
+    const res = await fetch(`${BACKEND}/files`);
+    const data = await res.json();
+
+    // ✅ Always ensure array
+    if (Array.isArray(data)) {
       setFiles(data);
-    } catch (err) { console.error(err); }
-  };
+    } else {
+      console.error("Invalid response:", data);
+      setFiles([]);
+    }
+  } catch (err) {
+    console.error("Fetch error:", err);
+    setFiles([]); // fallback
+  }
+};
 
   const fetchUsage = async () => {
     try {
@@ -97,7 +107,10 @@ export default function Home() {
 
   const usedMB  = (usage.used / 1024 / 1024).toFixed(2);
 
-  const FileGrid = ({ items }) => (
+  const FileGrid = ({ items }) => {
+  if (!Array.isArray(items)) return null; // ✅ safety check
+
+  return (
     <div className="files-grid">
       {items.map((f) => {
         const badge = getBadge(f.name);
@@ -110,20 +123,35 @@ export default function Home() {
                 <div className="file-meta">
                   {f.size ? formatSize(f.size) + " · " : ""}
                   👁 {f.views ?? 0} view{(f.views ?? 0) !== 1 ? "s" : ""}
-                  {badge && <span className={`badge ${badge.cls}`}>{badge.label}</span>}
+                  {badge && (
+                    <span className={`badge ${badge.cls}`}>
+                      {badge.label}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
+
             <div className="file-actions">
-              <a href={f.url} target="_blank" rel="noopener noreferrer" className="action-btn">👁 Preview</a>
-              <a href={`/share/${f._id}`} className="action-btn btn-share">🔗 Share</a>
-              <button className="action-btn btn-delete" onClick={() => deleteFile(f._id)}>🗑 Delete</button>
+              <a href={f.url} target="_blank" rel="noopener noreferrer" className="action-btn">
+                👁 Preview
+              </a>
+              <a href={`/share/${f._id}`} className="action-btn btn-share">
+                🔗 Share
+              </a>
+              <button
+                className="action-btn btn-delete"
+                onClick={() => deleteFile(f._id)}
+              >
+                🗑 Delete
+              </button>
             </div>
           </div>
         );
       })}
     </div>
   );
+};
 
   return (
     <div>
