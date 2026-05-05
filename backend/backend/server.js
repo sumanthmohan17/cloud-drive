@@ -138,7 +138,7 @@ app.post("/transfer/send", upload.single("file"), async (req, res) => {
     let code;
     do { code = generateCode(); } while (transferCodes.has(code));
 
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    const expiresAt = Date.now() + 15 * 60 * 1000; //15 mins
 
     transferCodes.set(code, {
       name: file.originalname,
@@ -156,7 +156,7 @@ app.post("/transfer/send", upload.single("file"), async (req, res) => {
         supabase.storage.from(process.env.SUPABASE_BUCKET).remove([entry.path]);
         transferCodes.delete(code);
       }
-    }, 24 * 60 * 60 * 1000);
+    }, 15 * 60 * 1000);
 
     res.json({ code, expiresAt, name: file.originalname, size: file.size });
   } catch (err) {

@@ -201,7 +201,7 @@ function FileTransfer() {
             <div style={{textAlign:"center"}}>
               <div style={{fontSize:12,color:"rgba(255,255,255,0.4)",marginBottom:12}}>Your Share Code</div>
               <div style={{fontSize:48,fontWeight:700,letterSpacing:12,color:"#fff",fontFamily:"monospace",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:14,padding:"18px 24px",marginBottom:12}}>{sendResult.code}</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginBottom:20}}>Expires in 24 hours · {sendResult.name}</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginBottom:20}}>Expires in 15 mins {sendResult.name}</div>
               <button onClick={()=>{navigator.clipboard.writeText(sendResult.code);alert(`Code ${sendResult.code} copied!`);}} style={{width:"100%",padding:"10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.06)",color:"#fff",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"inherit",marginBottom:10}}>📋 Copy Code</button>
               <button onClick={()=>{setSendResult(null);setSendFile(null);}} style={{width:"100%",padding:"10px",borderRadius:10,border:"none",background:"transparent",color:"rgba(255,255,255,0.35)",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Send another file</button>
             </div>
@@ -319,7 +319,16 @@ export default function Home() {
     try { await navigator.clipboard.writeText(link); alert("Link copied! 🔗\n\n" + link); }
     catch { prompt("Copy this link:", link); }
   };
-
+const openPreview = async (file) => {
+  try {
+    const res = await fetch(`${BACKEND}/file/${file._id}`);
+    const updated = await res.json();
+    setPreviewFile(updated);
+    fetchFiles();
+  } catch {
+    setPreviewFile(file);
+  }
+};
   const usedMB = (usage.used / 1024 / 1024).toFixed(2);
   const limitMB = ((usage.limit||1024*1024*1024) / 1024 / 1024).toFixed(0);
   const percent = Math.min(usage.percent||0, 100);
@@ -421,7 +430,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:14}}>
-                  {files.slice(0,6).map((f,i)=><FileCard key={f._id} f={f} onPreview={setPreviewFile} onShare={copyShare} onDelete={deleteFile} delay={i*0.05}/>)}
+                  {files.slice(0,6).map((f,i)=><FileCard key={f._id} f={f} onPreview={openPreview} onShare={copyShare} onDelete={deleteFile} delay={i*0.05}/>)}
                 </div>
               )}
             </div>
@@ -442,7 +451,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:14}}>
-                  {files.map((f,i)=><FileCard key={f._id} f={f} onPreview={setPreviewFile} onShare={copyShare} onDelete={deleteFile} delay={i*0.04}/>)}
+                  {files.map((f,i)=><FileCard key={f._id} f={f} onPreview={openPreview} onShare={copyShare} onDelete={deleteFile} delay={i*0.04}/>)}
                 </div>
               )}
             </div>
